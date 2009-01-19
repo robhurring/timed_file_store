@@ -26,7 +26,7 @@ In your +environment.rb+ file just set the cache_store to :timed_file_store
 Having the controller control the expiration of the cache is good if you are passing along any objects to the 
 views since it will not re-run the code if it is already cached. 
 
-<pre>
+
 	# reports_controller
 	# reports/1
 	@report = Report.find(params[:id])
@@ -39,19 +39,16 @@ views since it will not re-run the code if it is already cached.
 	  <!-- output the report HTML and such -->
 		<%= @report.name %>
 	<% end -%>;
-</pre>
 
 ===Expiring Cache From the View
 
 If you aren't running any intense code in the controller and just want to keep a certain view fragment 
 cached for a while, this should work. (** I didn't test this since I only needed the previous method, but it should work -- maybe with some slight tweaks? :)
 
-<pre name='code' class='ruby'>
 	# views/wherever/whatever.html.erb
 	<% cache("whatever", :time_to_live => 1.hour) do -%>;
 	  <!-- This is my HTML content and all that jazz -->
 	  <!-- After 1 hour this cache should be re-freshed -->
 	<% end -&>;
-</pre>
 
 Not sure how useful that would be when considering action and page caching... but its possible. 
