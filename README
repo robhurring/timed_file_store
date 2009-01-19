@@ -1,0 +1,57 @@
+==About
+
+This is just a subclass of the default FileStore caching option but with a few methods overridden to allow
+you to expire the cache. It is extremely basic, but was necessary for my project so I'll release it into the
+wild. Keep in mind that this hasn't been heavily tested and there are some quirks. But what do you expect from
+a quick-and-dirty hack? :)
+
+More on this: http://blog.ubrio.us/ruby/ruby-rails/simple-rails-time-based-fragment-caching-with-file-store/
+
+==Features
+
+# Can expire from the controller or view
+# Super lightweight
+# No modification necessary if you are already using FileStore
+# Expires caches automatically
+
+==Setup
+
+In your +environment.rb+ file just set the cache_store to :timed_file_store
+	config.cache_store = :timed_file_store, File.join(RAILS_ROOT, 'tmp', 'cache')
+
+==Usage
+
+===Expiring Cache From the Controller
+
+Having the controller control the expiration of the cache is good if you are passing along any objects to the 
+views since it will not re-run the code if it is already cached. 
+
+<pre>
+	# reports_controller
+	# reports/1
+	@report = Report.find(params[:id])
+	unless fragment_exists?("report_#{@report.id}", :time_to_live => 1.week)
+	  @report.run!
+	end
+
+	# views/reports/show.html.erb -- or whatever view file
+	<% cache("report_#{@report.id}") do -%>;
+	  <!-- output the report HTML and such -->
+		<%= @report.name %>
+	<% end -%>;
+</pre>
+
+===Expiring Cache From the View
+
+If you aren't running any intense code in the controller and just want to keep a certain view fragment 
+cached for a while, this should work. (** I didn't test this since I only needed the previous method, but it should work -- maybe with some slight tweaks? :)
+
+<pre name='code' class='ruby'>
+	# views/wherever/whatever.html.erb
+	<% cache("whatever", :time_to_live => 1.hour) do -%>;
+	  <!-- This is my HTML content and all that jazz -->
+	  <!-- After 1 hour this cache should be re-freshed -->
+	<% end -&>;
+</pre>
+
+Not sure how useful that would be when considering action and page caching... but its possible. 
